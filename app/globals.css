@@ -4,28 +4,29 @@
 
 @layer base {
   :root {
-    --background: 240 10% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 240 10% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 240 10% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 240 5.9% 10%;
-    --secondary: 240 3.7% 15.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
-    --accent: 240 3.7% 15.9%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --ring: 240 4.9% 83.9%;
+    --background: 224 71% 4%;
+    --foreground: 213 31% 91%;
+    --card: 224 71% 4%;
+    --card-foreground: 213 31% 91%;
+    --popover: 224 71% 4%;
+    --popover-foreground: 213 31% 91%;
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 1.2%;
+    --secondary: 222.2 47.4% 11.2%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 223 47% 11%;
+    --muted-foreground: 215.4 16.3% 56.9%;
+    --accent: 216 34% 17%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 63% 31%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 216 34% 17%;
+    --input: 216 34% 17%;
+    --ring: 216 34% 17%;
+    --radius: 0.75rem;
     --energy-green: 142 69% 58%;
-    --energy-gray: 220 13% 18%;
-    --chart-background: 240 10% 3.9%;
+    --energy-gray: 225 16% 18%;
+    --chart-background: 225 16% 8%;
     --success-green: 142 76% 46%;
   }
 }
@@ -37,6 +38,12 @@
   body {
     @apply bg-background text-foreground antialiased;
     font-feature-settings: "rlig" 1, "calt" 1;
+    color: rgb(var(--foreground-rgb));
+    background: linear-gradient(
+      to bottom,
+      rgb(var(--background-start-rgb)),
+      rgb(var(--background-end-rgb))
+    );
   }
 }
 
@@ -53,4 +60,69 @@
   .stat-label {
     @apply text-sm text-muted-foreground;
   }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .bg-grid-white\/5 {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath fill='white' fill-opacity='0.05' d='M12 0h1v24h-1V0zM0 12h24v1H0v-1z'/%3E%3C/svg%3E");
+  }
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--accent);
+  border-radius: var(--radius);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--muted);
+  border-radius: var(--radius);
+  border: 2px solid var(--accent);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--muted-foreground);
+}
+
+/* Card hover effects */
+.card-hover-effect {
+  @apply transition-all duration-200 ease-in-out;
+}
+
+.card-hover-effect:hover {
+  @apply transform -translate-y-1 shadow-lg;
+  box-shadow: 0 10px 40px -10px rgba(0, 255, 136, 0.1);
+}
+
+/* Gradient text */
+.gradient-text {
+  background: linear-gradient(90deg, #4ade80 0%, #60a5fa 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Gradient backgrounds */
+.gradient-border {
+  background: linear-gradient(var(--card), var(--card)) padding-box,
+    linear-gradient(to right, #4ade80, #60a5fa) border-box;
+  border: 1px solid transparent;
 }
