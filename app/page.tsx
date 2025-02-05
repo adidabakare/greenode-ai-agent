@@ -1,6 +1,18 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Badge } from "@/components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 // Simulated blockchain data types
 type BlockchainMetrics = {
@@ -168,18 +180,16 @@ export default function Dashboard() {
       {/* Main Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Energy Consumption Card */}
-        <div className="group relative overflow-hidden rounded-xl border bg-card p-6 shadow-md transition-all hover:shadow-lg">
-          <div className="absolute inset-0 bg-gradient-to-r from-green-500/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-          <div className="relative space-y-6">
-            <div className="flex justify-between items-center">
-              <h2 className="text-xl font-semibold tracking-tight">
-                Blockchain Energy Metrics
-              </h2>
-              <button className="inline-flex items-center justify-center rounded-full bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary transition-colors hover:bg-primary/20">
-                Optimize
-              </button>
-            </div>
-
+        <Card className="group relative overflow-hidden">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-7">
+            <CardTitle className="text-xl font-semibold">
+              Blockchain Energy Metrics
+            </CardTitle>
+            <Button variant="secondary" size="sm">
+              Optimize
+            </Button>
+          </CardHeader>
+          <CardContent>
             <div className="grid grid-cols-3 gap-4">
               <ConsumptionMetric
                 title="Gas Usage"
@@ -203,16 +213,16 @@ export default function Dashboard() {
                 color="purple"
               />
             </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
 
         {/* Network Status Card */}
-        <div className="rounded-xl border bg-card p-6 shadow-md">
-          <div className="flex justify-between items-center mb-6">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-7">
             <div className="space-y-1">
-              <h2 className="text-xl font-semibold tracking-tight">
+              <CardTitle className="text-xl font-semibold">
                 L2 Network Status
-              </h2>
+              </CardTitle>
               <div className="flex items-center space-x-2">
                 <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
                 <span className="text-sm text-muted-foreground">
@@ -220,68 +230,173 @@ export default function Dashboard() {
                 </span>
               </div>
             </div>
-            <EnhancedSwitch />
-          </div>
-
-          <div className="relative h-[240px] my-6">
+            <Switch checked={metrics.l2Status} />
+          </CardHeader>
+          <CardContent>
             <NetworkVisualization />
-          </div>
-
-          <div className="flex justify-between items-center">
-            <span className="text-sm text-muted-foreground">
-              Network Efficiency
-            </span>
-            <div className="flex items-center space-x-2">
-              <span className="text-2xl font-bold">
-                {metrics.networkEfficiency.toFixed(1)}%
+            <div className="flex justify-between items-center mt-6">
+              <span className="text-sm text-muted-foreground">
+                Network Efficiency
               </span>
-              <span className="text-sm text-green-500">↑ 2.4%</span>
+              <div className="flex items-center space-x-2">
+                <span className="text-2xl font-bold">
+                  {metrics.networkEfficiency.toFixed(1)}%
+                </span>
+                <span className="text-sm text-green-500">↑ 2.4%</span>
+              </div>
             </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
 
         {/* Recommendations Card */}
-        <div className="rounded-xl border bg-card p-6 shadow-md">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xl font-semibold tracking-tight">
-              AI Insights
-            </h2>
-          </div>
-
-          <div className="space-y-4">
-            {getRecommendations().map((rec, i) => (
-              <div key={i} className="bg-accent/50 rounded-xl p-4">
-                <div className="text-sm text-muted-foreground">{rec.type}</div>
-                <p className="font-medium mt-1">{rec.title}</p>
-                <p className="text-sm text-muted-foreground mt-1">
-                  {rec.description}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-7">
+            <CardTitle className="text-xl font-semibold">AI Insights</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {getRecommendations().map((rec, i) => (
+                <div key={i} className="bg-accent/50 rounded-xl p-4">
+                  <div className="text-sm text-muted-foreground">
+                    {rec.type}
+                  </div>
+                  <p className="font-medium mt-1">{rec.title}</p>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {rec.description}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Bottom Row */}
-        <div className="col-span-full">
-          <TransactionFeed transactions={recentTransactions} />
-        </div>
+        <Card className="col-span-full">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-7">
+            <CardTitle className="text-xl font-semibold">
+              Live Transactions
+            </CardTitle>
+            <div className="flex items-center space-x-2">
+              <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
+              <span className="text-sm text-muted-foreground">Live</span>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <ScrollArea className="h-[400px]">
+              <div className="space-y-4">
+                {recentTransactions.map((tx) => (
+                  <div
+                    key={tx.id}
+                    className="group relative overflow-hidden rounded-lg bg-accent/50 p-4 transition-all hover:bg-accent/70"
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="space-y-1">
+                        <div className="flex items-center space-x-2">
+                          <span className="text-sm font-medium">
+                            {tx.hash.substring(0, 10)}...
+                          </span>
+                          <Badge
+                            variant={
+                              tx.type === "contract"
+                                ? "purple"
+                                : tx.type === "transfer"
+                                ? "blue"
+                                : tx.type === "mint"
+                                ? "pink"
+                                : "orange"
+                            }
+                          >
+                            {tx.type}
+                          </Badge>
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          Gas: {tx.gasUsed.toLocaleString()} • Value:{" "}
+                          {tx.value.toFixed(4)} ETH
+                        </div>
+                      </div>
+                      <div className="flex flex-col items-end space-y-1">
+                        <Badge
+                          variant={
+                            tx.energyImpact === "high"
+                              ? "destructive"
+                              : tx.energyImpact === "medium"
+                              ? "yellow"
+                              : "green"
+                          }
+                        >
+                          {tx.energyImpact} impact
+                        </Badge>
+                        {tx.optimized && (
+                          <Badge variant="green">AI optimized</Badge>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </ScrollArea>
+          </CardContent>
+        </Card>
 
-        <div className="rounded-xl border bg-card p-6 shadow-md">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-semibold tracking-tight">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-7">
+            <CardTitle className="text-xl font-semibold">
               Gas Forecast
-            </h2>
-          </div>
-          <div className="text-sm text-muted-foreground">
-            Predicted base fee
-          </div>
-          <div className="text-4xl font-bold mt-4">5.7</div>
-          <div className="text-sm text-muted-foreground mt-1">gwei</div>
-        </div>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-sm text-muted-foreground">
+              Predicted base fee
+            </div>
+            <div className="text-4xl font-bold mt-4">5.7</div>
+            <div className="text-sm text-muted-foreground mt-1">gwei</div>
+          </CardContent>
+        </Card>
 
-        <WeeklyEnergyReport />
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-7">
+            <CardTitle className="text-xl font-semibold">
+              Energy Report
+            </CardTitle>
+            <Select defaultValue="week">
+              <SelectTrigger className="w-[120px]">
+                <SelectValue placeholder="Select period" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="week">Week</SelectItem>
+                <SelectItem value="month">Month</SelectItem>
+                <SelectItem value="year">Year</SelectItem>
+              </SelectContent>
+            </Select>
+          </CardHeader>
+          <CardContent>
+            <WeeklyEnergyReport />
+          </CardContent>
+        </Card>
 
-        <GreenEnergyUsage greenEnergyPercent={metrics.greenEnergyPercent} />
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-7">
+            <CardTitle className="text-xl font-semibold">
+              Green Energy Usage
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-4xl font-bold mt-4">
+              {metrics.greenEnergyPercent.toFixed(1)}%
+            </div>
+            <div className="text-sm text-muted-foreground mt-1">
+              Renewable Energy
+            </div>
+            <div className="mt-6">
+              <div className="h-2 w-full bg-accent rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-green-500 rounded-full transition-all duration-500"
+                  style={{ width: `${metrics.greenEnergyPercent}%` }}
+                />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
@@ -376,56 +491,20 @@ function WeeklyEnergyReport() {
   ];
 
   return (
-    <div className="rounded-xl border bg-card p-6 shadow-md">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-semibold tracking-tight">Energy Report</h2>
-        <select className="bg-transparent border rounded-full px-4 py-1">
-          <option>Week</option>
-        </select>
+    <div className="space-y-4">
+      <div className="text-sm text-muted-foreground">
+        Transaction Energy Impact
       </div>
-      <div className="space-y-4">
-        <div className="text-sm text-muted-foreground">
-          Transaction Energy Impact
-        </div>
-        <div className="grid grid-cols-7 gap-2">
-          {weeklyData.map((day) => (
-            <div key={day.day} className="text-center">
-              <div className="text-sm mb-1">
-                {day.day} {day.trend === "up" ? "↑" : "↓"}
-              </div>
-              <div className="text-sm font-medium">{day.value}</div>
-              <div className="text-xs text-muted-foreground">{day.type}</div>
+      <div className="grid grid-cols-7 gap-2">
+        {weeklyData.map((day) => (
+          <div key={day.day} className="text-center">
+            <div className="text-sm mb-1">
+              {day.day} {day.trend === "up" ? "↑" : "↓"}
             </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function GreenEnergyUsage({
-  greenEnergyPercent,
-}: {
-  greenEnergyPercent: number;
-}) {
-  return (
-    <div className="rounded-xl border bg-card p-6 shadow-md">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-semibold tracking-tight">
-          Green Energy Usage
-        </h2>
-      </div>
-      <div className="text-4xl font-bold mt-4">
-        {greenEnergyPercent.toFixed(1)}%
-      </div>
-      <div className="text-sm text-muted-foreground mt-1">Renewable Energy</div>
-      <div className="mt-6">
-        <div className="h-2 w-full bg-accent rounded-full overflow-hidden">
-          <div
-            className="h-full bg-green-500 rounded-full transition-all duration-500"
-            style={{ width: `${greenEnergyPercent}%` }}
-          />
-        </div>
+            <div className="text-sm font-medium">{day.value}</div>
+            <div className="text-xs text-muted-foreground">{day.type}</div>
+          </div>
+        ))}
       </div>
     </div>
   );
@@ -439,78 +518,5 @@ function EnhancedSwitch() {
         ON
       </span>
     </button>
-  );
-}
-
-function TransactionFeed({
-  transactions,
-}: {
-  transactions: BlockchainTransaction[];
-}) {
-  return (
-    <div className="rounded-xl border bg-card p-6 shadow-md">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-xl font-semibold tracking-tight">
-          Live Transactions
-        </h2>
-        <div className="flex items-center space-x-2">
-          <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
-          <span className="text-sm text-muted-foreground">Live</span>
-        </div>
-      </div>
-
-      <div className="space-y-4 max-h-[400px] overflow-y-auto">
-        {transactions.map((tx) => (
-          <div
-            key={tx.id}
-            className="group relative overflow-hidden rounded-lg bg-accent/50 p-4 transition-all hover:bg-accent/70"
-          >
-            <div className="flex items-start justify-between">
-              <div className="space-y-1">
-                <div className="flex items-center space-x-2">
-                  <span className="text-sm font-medium">
-                    {tx.hash.substring(0, 10)}...
-                  </span>
-                  <span
-                    className={`text-xs px-2 py-0.5 rounded-full ${
-                      tx.type === "contract"
-                        ? "bg-purple-500/20 text-purple-300"
-                        : tx.type === "transfer"
-                        ? "bg-blue-500/20 text-blue-300"
-                        : tx.type === "mint"
-                        ? "bg-pink-500/20 text-pink-300"
-                        : "bg-orange-500/20 text-orange-300"
-                    }`}
-                  >
-                    {tx.type}
-                  </span>
-                </div>
-                <div className="text-sm text-muted-foreground">
-                  Gas: {tx.gasUsed.toLocaleString()} • Value:{" "}
-                  {tx.value.toFixed(4)} ETH
-                </div>
-              </div>
-              <div className="flex flex-col items-end space-y-1">
-                <span
-                  className={`text-xs px-2 py-0.5 rounded-full ${
-                    tx.energyImpact === "high"
-                      ? "bg-red-500/20 text-red-300"
-                      : tx.energyImpact === "medium"
-                      ? "bg-yellow-500/20 text-yellow-300"
-                      : "bg-green-500/20 text-green-300"
-                  }`}
-                >
-                  {tx.energyImpact} impact
-                </span>
-                {tx.optimized && (
-                  <span className="text-xs text-green-500">AI optimized</span>
-                )}
-              </div>
-            </div>
-            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-green-500/0 via-green-500/30 to-green-500/0" />
-          </div>
-        ))}
-      </div>
-    </div>
   );
 }
