@@ -5,6 +5,7 @@ import {
   saveOptimizationRecommendation,
   updateDailyMetrics,
 } from "./db/actions";
+import { AgentService } from "./agent-service";
 
 export class MonitoringService {
   private provider: ethers.JsonRpcProvider;
@@ -15,6 +16,7 @@ export class MonitoringService {
   private processedTxHashes = new Set<string>();
   private aiEndpoint = "https://autonome.alt.technology/greenode-hrjiay/chat";
   private aiCredentials = btoa("greenode:dcMWueeaVK"); // Base64 encode credentials
+  private agentService: AgentService;
 
   constructor() {
     this.provider = new ethers.JsonRpcProvider("https://sepolia.base.org");
@@ -31,6 +33,8 @@ export class MonitoringService {
       GREENODE_MONITOR_ABI,
       this.provider
     );
+
+    this.agentService = AgentService.getInstance();
   }
 
   async startMonitoring(onNewTransaction: (data: any) => void) {
@@ -331,14 +335,22 @@ export class MonitoringService {
       console.log("Gas Used:", gasUsed.toString());
       console.log("Energy Impact:", energyImpact);
 
-      // Get AI insights
-      const aiInsight = await this.getAIInsight({
-        gasUsed: gasUsed.toString(),
-        energyImpact: energyImpact.toString(),
-        contractAddress: tx.to,
-      });
+      // Get insights from both agents
+      const [aiInsight, cdpInsight] = await Promise.all([
+        this.getAIInsight({
+          gasUsed: gasUsed.toString(),
+          energyImpact: energyImpact.toString(),
+          contractAddress: tx.to,
+        }),
+        this.agentService.getOptimizationInsights(tx),
+      ]);
 
-      console.log("AI Insight received:", aiInsight); // Debug log
+      // Combine insights
+      const combinedInsight = `
+Energy AI: ${aiInsight}
+
+CDP Analysis: ${cdpInsight}
+      `.trim();
 
       // Get optimization suggestion
       const suggestion = await this.getOptimizationSuggestion(gasUsed);
@@ -360,7 +372,7 @@ export class MonitoringService {
       if (suggestion.potentialSavings > 10) {
         await saveOptimizationRecommendation({
           contractAddress: tx.to,
-          recommendation: `${suggestion.suggestion}\n\nAI Insight: ${aiInsight}`,
+          recommendation: `${suggestion.suggestion}\n\nAI Insight: ${combinedInsight}`,
           type: "AI_OPTIMIZATION",
           priority: suggestion.potentialSavings > 50 ? "HIGH" : "MEDIUM",
           potentialSavings: suggestion.potentialSavings,
@@ -414,7 +426,7 @@ export class MonitoringService {
         ...tx,
         energyImpact,
         optimization: suggestion,
-        aiInsight,
+        aiInsight: combinedInsight,
         contractOwner: ownerInfo,
       };
     } catch (error) {
