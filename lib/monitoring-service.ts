@@ -13,6 +13,8 @@ export class MonitoringService {
   private basescanApi: string;
   public monitorContract: ethers.Contract;
   private processedTxHashes = new Set<string>();
+  private aiEndpoint = "https://autonome.alt.technology/greenode-hrjiay/chat";
+  private aiCredentials = btoa("greenode:dcMWueeaVK"); // Base64 encode credentials
 
   constructor() {
     this.provider = new ethers.JsonRpcProvider("https://sepolia.base.org");
@@ -193,20 +195,53 @@ export class MonitoringService {
     suggestion: string;
     potentialSavings: number;
   }> {
-    if (gasUsed > 2000000n) {
+    try {
+      // Base transaction gas cost on Base L2
+      const baseGas = 21000n;
+
+      // Calculate overhead percentage
+      const gasOverhead =
+        gasUsed > baseGas ? Number(((gasUsed - baseGas) * 100n) / gasUsed) : 0;
+
+      // Calculate savings based on transaction complexity
+      if (gasUsed > 2000000n) {
+        // Complex transactions - batch processing potential
+        const batchSavings = Math.min(Math.round(gasOverhead * 0.4), 65);
+        return {
+          suggestion:
+            "High gas usage detected. Consider implementing batch processing and optimizing loop operations.",
+          potentialSavings: batchSavings,
+        };
+      } else if (gasUsed > 1000000n) {
+        // Medium complexity - storage optimization potential
+        const storageSavings = Math.min(Math.round(gasOverhead * 0.3), 45);
+        return {
+          suggestion:
+            "Medium gas usage. Optimize storage patterns and reduce state variable updates.",
+          potentialSavings: storageSavings,
+        };
+      } else if (gasUsed > 500000n) {
+        // Lower complexity - basic optimizations
+        const basicSavings = Math.min(Math.round(gasOverhead * 0.2), 30);
+        return {
+          suggestion:
+            "Consider using calldata instead of memory for read-only arguments and optimize function modifiers.",
+          potentialSavings: basicSavings,
+        };
+      } else {
+        // Simple transactions
+        const simpleSavings = Math.min(Math.round(gasOverhead * 0.1), 15);
+        return {
+          suggestion:
+            "Transaction is relatively efficient. Consider bundling multiple operations if this is called frequently.",
+          potentialSavings: simpleSavings,
+        };
+      }
+    } catch (error) {
+      console.error("Error calculating optimization suggestion:", error);
       return {
-        suggestion: "Consider implementing batch processing",
-        potentialSavings: 30,
-      };
-    } else if (gasUsed > 1500000n) {
-      return {
-        suggestion: "Optimize storage access patterns",
-        potentialSavings: 20,
-      };
-    } else {
-      return {
-        suggestion: "Evaluate L2 migration opportunity",
-        potentialSavings: 85,
+        suggestion: "Unable to analyze transaction",
+        potentialSavings: 0,
       };
     }
   }
@@ -240,13 +275,75 @@ export class MonitoringService {
     return null;
   }
 
+  private async getAIInsight(context: {
+    gasUsed: string;
+    energyImpact: string;
+    transactionType?: string;
+    contractAddress: string;
+  }) {
+    try {
+      // Simpler, more direct prompt
+      const prompt = `Analyze this transaction for energy optimization:
+        Gas: ${context.gasUsed} units
+        Energy: ${context.energyImpact} kWh
+        Contract: ${context.contractAddress}
+
+        Provide a brief analysis of energy efficiency and optimization suggestions.`;
+
+      console.log("Sending AI request with prompt:", prompt); // Debug log
+
+      const response = await fetch(this.aiEndpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Basic ${this.aiCredentials}`,
+        },
+        body: JSON.stringify({
+          message: prompt,
+        }),
+      });
+
+      if (!response.ok) {
+        console.error("AI API Error:", response.status, await response.text());
+        return "Error getting AI analysis.";
+      }
+
+      const data = await response.json();
+      console.log("Raw AI Response:", data); // Debug log
+
+      if (!data.response || !data.response[0]) {
+        return "No AI analysis available.";
+      }
+
+      return data.response[0];
+    } catch (error) {
+      console.error("Detailed AI Error:", error);
+      return "AI analysis unavailable.";
+    }
+  }
+
   private async processTransaction(tx: any) {
     try {
       const gasUsed = tx.gasUsed;
       const energyImpact = this.calculateEnergyImpact(gasUsed);
+
+      console.log("Processing transaction:", tx.hash);
+      console.log("Gas Used:", gasUsed.toString());
+      console.log("Energy Impact:", energyImpact);
+
+      // Get AI insights
+      const aiInsight = await this.getAIInsight({
+        gasUsed: gasUsed.toString(),
+        energyImpact: energyImpact.toString(),
+        contractAddress: tx.to,
+      });
+
+      console.log("AI Insight received:", aiInsight); // Debug log
+
+      // Get optimization suggestion
       const suggestion = await this.getOptimizationSuggestion(gasUsed);
 
-      // Store transaction first
+      // Store transaction with AI insights
       const savedTx = await saveTransaction({
         hash: tx.hash,
         from: tx.from,
@@ -259,20 +356,16 @@ export class MonitoringService {
         input: tx.input,
       });
 
-      console.log("Transaction saved:", savedTx);
-
-      // Store optimization recommendation if significant savings potential
+      // Store AI-enhanced recommendation
       if (suggestion.potentialSavings > 10) {
-        const savedRecommendation = await saveOptimizationRecommendation({
+        await saveOptimizationRecommendation({
           contractAddress: tx.to,
-          recommendation: suggestion.suggestion,
-          type: "GAS_OPTIMIZATION",
+          recommendation: `${suggestion.suggestion}\n\nAI Insight: ${aiInsight}`,
+          type: "AI_OPTIMIZATION",
           priority: suggestion.potentialSavings > 50 ? "HIGH" : "MEDIUM",
           potentialSavings: suggestion.potentialSavings,
           status: "PENDING",
         });
-
-        console.log("Optimization recommendation saved:", savedRecommendation);
       }
 
       // Get contract owner info
@@ -321,6 +414,7 @@ export class MonitoringService {
         ...tx,
         energyImpact,
         optimization: suggestion,
+        aiInsight,
         contractOwner: ownerInfo,
       };
     } catch (error) {
@@ -370,6 +464,39 @@ export class MonitoringService {
         totalSupply: "0",
         symbol: "GREEN",
       };
+    }
+  }
+
+  // Add method to get AI analysis for specific metrics
+  public async getAIAnalysis(metrics: {
+    totalGasUsed: string;
+    averageGasPrice: number;
+    totalTransactions: number;
+    energyImpact: string;
+  }) {
+    try {
+      const response = await fetch(this.aiEndpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Basic ${this.aiCredentials}`,
+        },
+        body: JSON.stringify({
+          message: `Analyze these network metrics:
+            - Total Gas Used: ${metrics.totalGasUsed}
+            - Average Gas Price: ${metrics.averageGasPrice} Gwei
+            - Total Transactions: ${metrics.totalTransactions}
+            - Energy Impact: ${metrics.energyImpact} kWh
+            
+            Provide network efficiency insights and sustainability recommendations.`,
+        }),
+      });
+
+      const data = await response.json();
+      return data.response[0];
+    } catch (error) {
+      console.error("Error getting AI analysis:", error);
+      return "Unable to get AI analysis at this time.";
     }
   }
 }
