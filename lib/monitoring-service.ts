@@ -1,11 +1,18 @@
-import { ethers } from "ethers";
+import { ethers, formatEther } from "ethers";
 import { GREENODE_MONITOR_ABI } from "./contract-abis";
+import {
+  saveTransaction,
+  saveOptimizationRecommendation,
+  updateDailyMetrics,
+} from "./db/actions";
 
 export class MonitoringService {
   private provider: ethers.JsonRpcProvider;
   private wsProvider: ethers.WebSocketProvider;
   private basescanApiKey: string;
   private basescanApi: string;
+  public monitorContract: ethers.Contract;
+  private processedTxHashes = new Set<string>();
 
   constructor() {
     this.provider = new ethers.JsonRpcProvider("https://sepolia.base.org");
@@ -15,65 +22,142 @@ export class MonitoringService {
     );
     this.basescanApiKey = process.env.NEXT_PUBLIC_BASESCAN_API_KEY || "";
     this.basescanApi = "https://api-sepolia.basescan.org/api";
+
+    // Initialize contract
+    this.monitorContract = new ethers.Contract(
+      "0x92EECac0a67372fB4420FB61aAd28b77B335A790",
+      GREENODE_MONITOR_ABI,
+      this.provider
+    );
   }
 
   async startMonitoring(onNewTransaction: (data: any) => void) {
-    // Get initial recent transactions
-    await this.fetchRecentTransactions(onNewTransaction);
+    try {
+      // Clear processed transactions every hour to prevent memory leaks
+      setInterval(() => {
+        this.processedTxHashes.clear();
+      }, 3600000);
 
-    // Listen to new pending transactions
-    this.wsProvider.on("pending", async (txHash) => {
-      try {
-        const tx = await this.provider.getTransaction(txHash);
-        if (tx && tx.to) {
-          const receipt = await tx.wait();
-          if (receipt) {
-            const block = await this.provider.getBlock(receipt.blockNumber);
-            if (block) {
-              const txData = {
-                hash: tx.hash,
-                from: tx.from,
-                to: tx.to,
-                gasUsed: receipt.gasUsed,
-                gasPrice: tx.gasPrice,
-                blockNumber: receipt.blockNumber,
-                timestamp: block.timestamp,
-                energyImpact: this.calculateEnergyImpact(receipt.gasUsed),
-                input: tx.data,
-              };
-              onNewTransaction(txData);
+      // Get initial transactions
+      await this.fetchRecentTransactions(onNewTransaction);
+
+      // Set up WebSocket listener with debounce
+      let processingTx = false;
+      this.wsProvider.on("pending", async (txHash) => {
+        if (processingTx || this.processedTxHashes.has(txHash)) return;
+
+        try {
+          processingTx = true;
+          const tx = await this.provider.getTransaction(txHash);
+          if (tx && tx.to) {
+            const receipt = await tx.wait();
+            if (receipt) {
+              const block = await this.provider.getBlock(receipt.blockNumber);
+              if (block) {
+                this.processedTxHashes.add(txHash);
+                const txData = await this.processTransaction({
+                  hash: tx.hash,
+                  from: tx.from,
+                  to: tx.to,
+                  gasUsed: receipt.gasUsed,
+                  gasPrice: tx.gasPrice,
+                  blockNumber: receipt.blockNumber,
+                  timestamp: block.timestamp,
+                  input: tx.data,
+                });
+                onNewTransaction(txData);
+              }
             }
           }
+        } catch (error) {
+          // Ignore errors for pending transactions
+          console.log("Skipping pending transaction:", error.message);
+        } finally {
+          processingTx = false;
         }
-      } catch (error) {
-        // Ignore errors for pending transactions
-      }
-    });
+      });
+
+      return true;
+    } catch (error) {
+      console.error("Error starting monitoring:", error);
+      return false;
+    }
   }
 
   public async fetchRecentTransactions(onNewTransaction: (data: any) => void) {
     try {
-      // Use getrecenttxs API endpoint instead of txlist
       const response = await fetch(
         `${this.basescanApi}?module=proxy&action=eth_getBlockByNumber&tag=latest&boolean=true&apikey=${this.basescanApiKey}`
       );
 
       const data = await response.json();
       if (data.result && data.result.transactions) {
+        const processedTxs = new Set(); // Track transactions within this fetch
+
         for (const tx of data.result.transactions) {
-          if (tx.to) {
-            const txData = {
-              hash: tx.hash,
-              from: tx.from,
-              to: tx.to,
-              gasUsed: BigInt(tx.gas),
-              gasPrice: BigInt(tx.gasPrice),
-              blockNumber: parseInt(tx.blockNumber),
-              timestamp: Math.floor(Date.now() / 1000), // Current timestamp
-              energyImpact: this.calculateEnergyImpact(BigInt(tx.gas)),
-              input: tx.input,
-            };
-            onNewTransaction(txData);
+          if (
+            tx.to &&
+            !this.processedTxHashes.has(tx.hash) &&
+            !processedTxs.has(tx.hash)
+          ) {
+            try {
+              processedTxs.add(tx.hash);
+              this.processedTxHashes.add(tx.hash);
+
+              const gasUsed = BigInt(tx.gas);
+              const energyImpact = this.calculateEnergyImpact(gasUsed);
+              const suggestion = await this.getOptimizationSuggestion(gasUsed);
+
+              try {
+                const savedTx = await saveTransaction({
+                  hash: tx.hash,
+                  from: tx.from,
+                  to: tx.to,
+                  gasUsed: gasUsed.toString(),
+                  gasPrice: tx.gasPrice,
+                  blockNumber: parseInt(tx.blockNumber),
+                  timestamp: new Date(),
+                  energyImpact: energyImpact.toString(),
+                  input: tx.input,
+                });
+
+                // Only proceed if transaction was saved successfully
+                if (savedTx) {
+                  if (suggestion.potentialSavings > 10) {
+                    await saveOptimizationRecommendation({
+                      contractAddress: tx.to,
+                      recommendation: suggestion.suggestion,
+                      type: "GAS_OPTIMIZATION",
+                      priority:
+                        suggestion.potentialSavings > 50 ? "HIGH" : "MEDIUM",
+                      potentialSavings: suggestion.potentialSavings,
+                      status: "PENDING",
+                    });
+                  }
+
+                  const txData = {
+                    hash: tx.hash,
+                    from: tx.from,
+                    to: tx.to,
+                    gasUsed,
+                    gasPrice: BigInt(tx.gasPrice),
+                    blockNumber: parseInt(tx.blockNumber),
+                    timestamp: Math.floor(Date.now() / 1000),
+                    energyImpact,
+                    input: tx.input,
+                    optimization: suggestion,
+                  };
+
+                  onNewTransaction(txData);
+                }
+              } catch (error) {
+                if (!error.message?.includes("duplicate key")) {
+                  console.error("Database error:", error);
+                }
+              }
+            } catch (error) {
+              console.error("Error processing transaction:", error);
+            }
           }
         }
       }
@@ -127,38 +211,6 @@ export class MonitoringService {
     }
   }
 
-  private async checkAndNotifyOwner(tx: any) {
-    try {
-      // Get contract metadata
-      const metadata = await this.monitorContract.contractRegistry(tx.to);
-
-      if (metadata.notificationsEnabled) {
-        const gasUsed = tx.gasUsed;
-        const suggestion = await this.getOptimizationSuggestion(gasUsed);
-
-        // Notify on-chain
-        await this.monitorContract.notifyOptimization(
-          tx.to,
-          gasUsed,
-          suggestion.suggestion
-        );
-
-        // Check for rewards
-        if (
-          Number(gasUsed) <
-          Number(await this.monitorContract.REWARD_THRESHOLD())
-        ) {
-          await this.monitorContract.rewardEfficientTransaction(
-            tx.from,
-            gasUsed
-          );
-        }
-      }
-    } catch (error) {
-      console.error("Error notifying owner:", error);
-    }
-  }
-
   public async fetchContractOwnerInfo(address: string) {
     try {
       // Get contract creator
@@ -188,15 +240,136 @@ export class MonitoringService {
     return null;
   }
 
-  // Update the transaction processing to include notifications
   private async processTransaction(tx: any) {
-    const txData = {
-      // ... existing txData ...
-    };
+    try {
+      const gasUsed = tx.gasUsed;
+      const energyImpact = this.calculateEnergyImpact(gasUsed);
+      const suggestion = await this.getOptimizationSuggestion(gasUsed);
 
-    // Check for notifications and rewards
-    await this.checkAndNotifyOwner(tx);
+      // Store transaction first
+      const savedTx = await saveTransaction({
+        hash: tx.hash,
+        from: tx.from,
+        to: tx.to,
+        gasUsed: gasUsed.toString(),
+        gasPrice: tx.gasPrice.toString(),
+        blockNumber: tx.blockNumber,
+        timestamp: new Date(tx.timestamp * 1000),
+        energyImpact: energyImpact.toString(),
+        input: tx.input,
+      });
 
-    return txData;
+      console.log("Transaction saved:", savedTx);
+
+      // Store optimization recommendation if significant savings potential
+      if (suggestion.potentialSavings > 10) {
+        const savedRecommendation = await saveOptimizationRecommendation({
+          contractAddress: tx.to,
+          recommendation: suggestion.suggestion,
+          type: "GAS_OPTIMIZATION",
+          priority: suggestion.potentialSavings > 50 ? "HIGH" : "MEDIUM",
+          potentialSavings: suggestion.potentialSavings,
+          status: "PENDING",
+        });
+
+        console.log("Optimization recommendation saved:", savedRecommendation);
+      }
+
+      // Get contract owner info
+      const ownerInfo = await this.fetchContractOwnerInfo(tx.to);
+
+      if (ownerInfo && ownerInfo.isRegistered) {
+        // Notify contract owner about optimization
+        const signer = await this.provider.getSigner();
+        const connectedContract = this.monitorContract.connect(signer);
+
+        await connectedContract.notifyOptimization(
+          tx.to,
+          gasUsed,
+          suggestion.suggestion
+        );
+
+        console.log("Notified contract owner:", {
+          contract: tx.to,
+          owner: ownerInfo.address,
+          ens: ownerInfo.ens,
+          suggestion: suggestion.suggestion,
+        });
+      }
+
+      // Check if transaction is efficient for rewards
+      if (
+        Number(gasUsed) < Number(await this.monitorContract.REWARD_THRESHOLD())
+      ) {
+        const signer = await this.provider.getSigner();
+        const connectedContract = this.monitorContract.connect(signer);
+        await connectedContract.rewardEfficientTransaction(tx.from, gasUsed);
+      }
+
+      // Update daily metrics
+      await updateDailyMetrics({
+        date: new Date(),
+        totalGasUsed: gasUsed.toString(),
+        averageGasPrice: Number(tx.gasPrice),
+        totalTransactions: 1,
+        energyImpact: energyImpact.toString(),
+        carbonOffset: (energyImpact * 0.4).toString(), // Rough estimate of carbon offset
+        l2Adoption: 100, // Since we're on Base L2
+      });
+
+      return {
+        ...tx,
+        energyImpact,
+        optimization: suggestion,
+        contractOwner: ownerInfo,
+      };
+    } catch (error) {
+      console.error("Error processing transaction:", error);
+      throw error;
+    }
+  }
+
+  // Add a method to register contract for notifications
+  public async registerContractForNotifications(
+    contractAddress: string,
+    contactInfo: string
+  ) {
+    try {
+      const signer = await this.provider.getSigner();
+      const connectedContract = this.monitorContract.connect(signer);
+      await connectedContract.registerContract(contractAddress, contactInfo);
+      console.log("Contract registered for notifications:", contractAddress);
+    } catch (error) {
+      console.error("Error registering contract:", error);
+    }
+  }
+
+  // Add a method to toggle notifications
+  public async toggleContractNotifications(contractAddress: string) {
+    try {
+      const signer = await this.provider.getSigner();
+      const connectedContract = this.monitorContract.connect(signer);
+      await connectedContract.toggleNotifications(contractAddress);
+      console.log("Toggled notifications for contract:", contractAddress);
+    } catch (error) {
+      console.error("Error toggling notifications:", error);
+    }
+  }
+
+  public async getTokenInfo() {
+    try {
+      const totalSupply = await this.monitorContract.totalSupply();
+
+      return {
+        totalSupply: formatEther(totalSupply),
+        symbol: await this.monitorContract.symbol(),
+      };
+    } catch (error) {
+      console.error("Error fetching token info:", error);
+      return {
+        totalSupply: "0",
+        symbol: "GREEN",
+      };
+    }
   }
 }
