@@ -56,6 +56,31 @@ export default {
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
       },
+      animation: {
+        "ping-slow": "ping 3s cubic-bezier(0, 0, 0.2, 1) infinite",
+        progress: "progress 2s ease-in-out infinite",
+        bounce: "bounce 1s infinite",
+        ping: "ping 2s cubic-bezier(0, 0, 0.2, 1) infinite",
+      },
+      keyframes: {
+        ping: {
+          "75%, 100%": {
+            transform: "scale(2)",
+            opacity: "0",
+          },
+        },
+        progress: {
+          "0%": {
+            width: "0%",
+          },
+          "50%": {
+            width: "100%",
+          },
+          "100%": {
+            width: "0%",
+          },
+        },
+      },
     },
   },
   plugins: [require("tailwindcss-animate")],
