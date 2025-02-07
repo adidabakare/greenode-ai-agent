@@ -177,7 +177,7 @@ export default function EnergyDashboard() {
         </div>
       </nav>
 
-      <main className="container mx-auto px-8 py-10">
+      <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10">
         {/* Enhanced Page Header */}
         <div className="flex justify-between items-start mb-12">
           <div className="space-y-4">
@@ -204,9 +204,47 @@ export default function EnergyDashboard() {
         </div>
 
         {/* Add TokenRewardsPanel before the grid */}
-        <TokenRewardsPanel />
+        <div className="bg-gray-900/50 rounded-lg p-4 sm:p-6 mb-4 sm:mb-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-8">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-8">
+              {/* Title Section */}
+              <div className="flex items-center gap-4">
+                <Coins className="w-6 h-6 sm:w-8 sm:h-8 text-green-400" />
+                <div>
+                  <h2 className="text-lg sm:text-xl font-light">
+                    Energy Rewards
+                  </h2>
+                  <p className="text-xs text-gray-400 mt-1">
+                    {tokenInfo.symbol} tokens earned for efficiency
+                  </p>
+                </div>
+              </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {/* Total Supply */}
+              <div className="flex items-center gap-4 sm:gap-6 border-t sm:border-t-0 sm:border-l border-gray-800/50 pt-4 sm:pt-0 sm:pl-8">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-green-400/5 rounded-lg">
+                    <Sparkles className="w-5 h-5 text-green-400" />
+                  </div>
+                  <div>
+                    <div className="text-2xl font-light">{totalSupplyInM}</div>
+                    <div className="text-xs text-gray-400">Total Supply</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Reward Info */}
+            <div className="flex items-center gap-2 bg-green-400/5 px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm">
+              <Zap className="w-4 h-4 text-green-400" />
+              <span className="text-sm text-green-400">
+                Earn 100 {tokenInfo.symbol} per efficient transaction
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {/* Energy Impact Analysis */}
           <div className="col-span-1 md:col-span-2 bg-gray-900/50 rounded-lg p-6">
             <div className="flex justify-between items-center mb-6">
@@ -327,9 +365,9 @@ export default function EnergyDashboard() {
 
 function MetricPanel({ title, value, unit, trend, data }: MetricPanelProps) {
   return (
-    <div className="space-y-4">
+    <div className="space-y-3 sm:space-y-4">
       <div className="flex justify-between items-center">
-        <span className="text-sm">
+        <span className="text-xs sm:text-sm">
           {title}{" "}
           {trend.direction === "up" ? (
             <ChevronUp className="inline w-4 h-4 text-green-400" />
@@ -343,10 +381,12 @@ function MetricPanel({ title, value, unit, trend, data }: MetricPanelProps) {
         <MoreVertical className="w-4 h-4 text-gray-400" />
       </div>
       <div>
-        <div className="text-4xl font-light tracking-tight mb-1">{value}</div>
+        <div className="text-2xl sm:text-4xl font-light tracking-tight mb-1">
+          {value}
+        </div>
         <div className="text-xs text-gray-400">{unit}</div>
       </div>
-      <div className="h-24 flex items-end space-x-1">
+      <div className="h-16 sm:h-24 flex items-end space-x-1">
         {data.map((value, i) => (
           <div key={i} className="flex flex-col gap-px flex-1">
             <div
@@ -366,9 +406,9 @@ function MetricPanel({ title, value, unit, trend, data }: MetricPanelProps) {
 
 function RecommendationCard({ title, description, priority }) {
   return (
-    <div className="bg-[#e8efe8] rounded-lg p-4 text-black">
-      <div className="font-medium mb-1">{title}</div>
-      <div className="text-sm text-gray-600">{description}</div>
+    <div className="bg-[#e8efe8] rounded-lg p-3 sm:p-4 text-black">
+      <div className="font-medium text-sm sm:text-base mb-1">{title}</div>
+      <div className="text-xs sm:text-sm text-gray-600">{description}</div>
       <div className="text-xs text-gray-500 mt-2">{priority}</div>
     </div>
   );
@@ -396,16 +436,17 @@ function CarbonCreditsPanel({
   const prediction = calculateCarbonPrediction(totalOffset);
 
   return (
-    <div className="bg-[#e8efe8] text-black rounded-lg p-6">
-      <div className="flex justify-between items-center mb-6">
+    <div className="bg-[#e8efe8] text-black rounded-lg p-4 sm:p-6">
+      <div className="flex justify-between items-center mb-4 sm:mb-6">
         <div>
-          <h2 className="text-xl">Carbon Credits</h2>
+          <h2 className="text-lg sm:text-xl">Carbon Credits</h2>
           <p className="text-xs text-gray-600 mt-1">Via KlimaDAO</p>
         </div>
-        <MoreVertical className="w-4 h-4" />
       </div>
-      <div className="text-sm text-gray-600 mb-4">Total offset prediction</div>
-      <div className="text-6xl font-light tracking-tight mb-2">
+      <div className="text-xs sm:text-sm text-gray-600 mb-3 sm:mb-4">
+        Total offset prediction
+      </div>
+      <div className="text-4xl sm:text-6xl font-light tracking-tight mb-2">
         {prediction.toFixed(1)}
       </div>
       <div className="text-sm text-gray-600">tonnes CO₂</div>
@@ -430,8 +471,8 @@ function NetworkActivity({
   isLoading: boolean;
 }) {
   return (
-    <div className="col-span-1 md:col-span-2 bg-gray-900/50 rounded-lg p-6">
-      <div className="flex justify-between items-center mb-6">
+    <div className="col-span-1 md:col-span-2 bg-gray-900/50 rounded-lg p-4 sm:p-6">
+      <div className="flex justify-between items-center mb-4 sm:mb-6">
         <div>
           <h2 className="text-xl font-light">Network Activity</h2>
           <p className="text-xs text-gray-400 mt-1">
@@ -446,7 +487,7 @@ function NetworkActivity({
           Week
         </Button>
       </div>
-      <div className="grid grid-cols-7 gap-4">
+      <div className="grid grid-cols-4 sm:grid-cols-7 gap-2 sm:gap-4">
         {networkActivity.map((day) => (
           <DayMetrics key={day.day} data={day} isLoading={isLoading} />
         ))}
@@ -471,10 +512,12 @@ function DayMetrics({
 }) {
   return (
     <div className="text-center">
-      <div className="text-xs text-gray-400 mb-2">{data.day}</div>
+      <div className="text-[10px] sm:text-xs text-gray-400 mb-1 sm:mb-2">
+        {data.day}
+      </div>
       <div
         className={cn(
-          "h-32 bg-gray-800 rounded relative overflow-hidden",
+          "h-24 sm:h-32 bg-gray-800 rounded relative overflow-hidden",
           data.isToday && "ring-1 ring-green-400"
         )}
       >
@@ -485,7 +528,7 @@ function DayMetrics({
           />
         )}
       </div>
-      <div className="mt-2 text-xs text-gray-400">
+      <div className="mt-1 sm:mt-2 text-[10px] sm:text-xs text-gray-400">
         {isLoading ? <LoadingDots /> : `${data.value} txns`}
       </div>
       <div className="text-[10px] text-gray-500">
