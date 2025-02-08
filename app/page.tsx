@@ -66,23 +66,25 @@ function TokenRewardsPanel() {
 
   return (
     <div className="bg-gray-900/50 rounded-lg p-4 sm:p-6 mb-4 sm:mb-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-8">
-        <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-8">
+      <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full lg:w-auto">
           {/* Title Section */}
-          <div className="flex items-center gap-4">
-            <Coins className="w-6 h-6 sm:w-8 sm:h-8 text-green-400" />
-            <div>
-              <h2 className="text-lg sm:text-xl font-light">Energy Rewards</h2>
-              <p className="text-xs text-gray-400 mt-1">
+          <div className="flex items-center gap-4 w-full sm:w-auto">
+            <Coins className="w-6 h-6 sm:w-8 sm:h-8 text-green-400 flex-shrink-0" />
+            <div className="min-w-0">
+              <h2 className="text-lg sm:text-xl font-light truncate">
+                Energy Rewards
+              </h2>
+              <p className="text-xs text-gray-400 mt-1 truncate">
                 {tokenInfo.symbol} tokens earned for efficiency
               </p>
             </div>
           </div>
 
           {/* Total Supply */}
-          <div className="flex items-center gap-4 sm:gap-6 border-t sm:border-t-0 sm:border-l border-gray-800/50 pt-4 sm:pt-0 sm:pl-8">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-green-400/5 rounded-lg">
+          <div className="flex items-center gap-4 border-t lg:border-t-0 lg:border-l border-gray-800/50 pt-4 lg:pt-0 lg:pl-8 w-full sm:w-auto">
+            <div className="flex items-center gap-3 w-full sm:w-auto">
+              <div className="p-2 bg-green-400/5 rounded-lg flex-shrink-0">
                 <Sparkles className="w-5 h-5 text-green-400" />
               </div>
               <div>
@@ -94,9 +96,9 @@ function TokenRewardsPanel() {
         </div>
 
         {/* Reward Info */}
-        <div className="flex items-center gap-2 bg-green-400/5 px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm">
-          <Zap className="w-4 h-4 text-green-400" />
-          <span className="text-green-400">
+        <div className="flex items-center gap-2 bg-green-400/5 px-3 py-2 rounded-lg text-xs w-full lg:w-auto">
+          <Zap className="w-4 h-4 text-green-400 flex-shrink-0" />
+          <span className="text-green-400 truncate">
             Earn 100 {tokenInfo.symbol} per efficient transaction
           </span>
         </div>
@@ -132,11 +134,11 @@ export default function EnergyDashboard() {
 
   return (
     <div className="min-h-screen bg-black text-white">
-      {/* Enhanced Header with better spacing */}
+      {/* Enhanced Header */}
       <nav className="border-b border-gray-800/50">
-        <div className="container mx-auto px-8 py-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-8">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-4 sm:gap-8">
               <div className="flex items-center gap-3">
                 <div className="relative">
                   <Hexagon className="w-8 h-8 text-green-400" />
@@ -152,17 +154,17 @@ export default function EnergyDashboard() {
                 </div>
               </div>
             </div>
-            <div className="flex items-center gap-6">
-              <div className="flex items-center gap-4 px-3 py-1.5 bg-green-400/5 rounded-md border border-green-400/20">
+            <div className="flex items-center gap-4 w-full sm:w-auto">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 px-3 py-1.5 bg-green-400/5 rounded-md border border-green-400/20 w-full sm:w-auto">
                 <div className="flex items-center gap-2">
-                  <div className="h-2 w-2 rounded-full bg-green-400 animate-pulse" />
+                  <div className="h-2 w-2 rounded-full bg-green-400 animate-pulse flex-shrink-0" />
                   <span className="text-sm text-green-400">
                     AI Agent Active
                   </span>
                 </div>
                 <Badge
                   variant="outline"
-                  className="font-mono bg-black/30 rounded-md"
+                  className="font-mono bg-black/30 rounded-md w-full sm:w-auto"
                 >
                   <Activity className="w-3.5 h-3.5 mr-2 text-green-400" />
                   {isLoading ? (
@@ -178,73 +180,37 @@ export default function EnergyDashboard() {
       </nav>
 
       <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10">
-        {/* Enhanced Page Header */}
-        <div className="flex justify-between items-start mb-12">
-          <div className="space-y-4">
+        {/* Page Header */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 sm:mb-12 gap-4">
+          <div className="space-y-2 sm:space-y-4">
             <div className="space-y-1">
-              <h1 className="text-3xl font-light tracking-wide">
+              <h1 className="text-2xl sm:text-3xl font-light tracking-wide">
                 DeFAI Energy Optimization
               </h1>
-              <p className="text-gray-400">
+              <p className="text-sm sm:text-base text-gray-400">
                 AI-powered energy optimization and monitoring for blockchain
                 transactions
               </p>
             </div>
-            <div className="flex items-center gap-6"></div>
           </div>
           <div className="text-right">
-            <div className="text-4xl font-light tracking-tight">
+            <div className="text-3xl sm:text-4xl font-light tracking-tight">
               {new Date().toLocaleTimeString([], {
                 hour: "2-digit",
                 minute: "2-digit",
               })}
             </div>
-            <div className="text-sm text-gray-400 mt-1">Local Time</div>
+            <div className="text-xs sm:text-sm text-gray-400 mt-1">
+              Local Time
+            </div>
           </div>
         </div>
-        {/* token Section */}
 
-        {/* <div className="bg-gray-900/50 rounded-lg p-4 sm:p-6 mb-4 sm:mb-6">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-8">
-            <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-8">
-              <div className="flex items-center gap-4">
-                <Coins className="w-6 h-6 sm:w-8 sm:h-8 text-green-400" />
-                <div>
-                  <h2 className="text-lg sm:text-xl font-light">
-                    Energy Rewards
-                  </h2>
-                  <p className="text-xs text-gray-400 mt-1">
-                    {tokenInfo.symbol} tokens earned for efficiency
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-4 sm:gap-6 border-t sm:border-t-0 sm:border-l border-gray-800/50 pt-4 sm:pt-0 sm:pl-8">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-green-400/5 rounded-lg">
-                    <Sparkles className="w-5 h-5 text-green-400" />
-                  </div>
-                  <div>
-                    <div className="text-2xl font-light">{totalSupplyInM}</div>
-                    <div className="text-xs text-gray-400">Total Supply</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2 bg-green-400/5 px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm">
-              <Zap className="w-4 h-4 text-green-400" />
-              <span className="text-sm text-green-400">
-                Earn 100 {tokenInfo.symbol} per efficient transaction
-              </span>
-            </div>
-          </div>
-        </div> */}
-
+        {/* Grid Layout */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {/* Energy Impact Analysis */}
-          <div className="col-span-1 md:col-span-2 bg-gray-900/50 rounded-lg p-6">
-            <div className="flex justify-between items-center mb-6">
+          <div className="col-span-1 md:col-span-2 bg-gray-900/50 rounded-lg p-4 sm:p-6">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
               <div>
                 <h2 className="text-xl font-light">Energy Impact</h2>
                 <p className="text-xs text-gray-400 mt-1">
@@ -254,13 +220,13 @@ export default function EnergyDashboard() {
               <Button
                 variant="outline"
                 size="sm"
-                className="text-xs h-8 rounded-full"
+                className="text-xs h-8 rounded-full w-full sm:w-auto"
               >
                 Change metrics
               </Button>
             </div>
 
-            <div className="grid grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-8">
               <MetricPanel
                 title="Contract Calls"
                 value={
@@ -362,9 +328,9 @@ export default function EnergyDashboard() {
 
 function MetricPanel({ title, value, unit, trend, data }: MetricPanelProps) {
   return (
-    <div className="space-y-3 sm:space-y-4">
+    <div className="space-y-3 sm:space-y-4 p-4 sm:p-0">
       <div className="flex justify-between items-center">
-        <span className="text-xs sm:text-sm">
+        <span className="text-xs sm:text-sm truncate">
           {title}{" "}
           {trend.direction === "up" ? (
             <ChevronUp className="inline w-4 h-4 text-green-400" />
@@ -375,10 +341,10 @@ function MetricPanel({ title, value, unit, trend, data }: MetricPanelProps) {
             {trend.percentage}%
           </span>
         </span>
-        <MoreVertical className="w-4 h-4 text-gray-400" />
+        <MoreVertical className="w-4 h-4 text-gray-400 flex-shrink-0" />
       </div>
       <div>
-        <div className="text-2xl sm:text-4xl font-light tracking-tight mb-1">
+        <div className="text-xl sm:text-2xl md:text-4xl font-light tracking-tight mb-1 truncate">
           {value}
         </div>
         <div className="text-xs text-gray-400">{unit}</div>
