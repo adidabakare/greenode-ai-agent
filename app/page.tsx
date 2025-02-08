@@ -65,14 +65,14 @@ function TokenRewardsPanel() {
     (Number(tokenInfo.totalSupply) / 1_000_000).toFixed(1) + "M";
 
   return (
-    <div className="bg-gray-900/50 rounded-lg p-6 mb-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-8">
+    <div className="bg-gray-900/50 rounded-lg p-4 sm:p-6 mb-4 sm:mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-8">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-8">
           {/* Title Section */}
           <div className="flex items-center gap-4">
-            <Coins className="w-8 h-8 text-green-400" />
+            <Coins className="w-6 h-6 sm:w-8 sm:h-8 text-green-400" />
             <div>
-              <h2 className="text-xl font-light">Energy Rewards</h2>
+              <h2 className="text-lg sm:text-xl font-light">Energy Rewards</h2>
               <p className="text-xs text-gray-400 mt-1">
                 {tokenInfo.symbol} tokens earned for efficiency
               </p>
@@ -80,7 +80,7 @@ function TokenRewardsPanel() {
           </div>
 
           {/* Total Supply */}
-          <div className="flex items-center gap-6 border-l border-gray-800/50 pl-8">
+          <div className="flex items-center gap-4 sm:gap-6 border-t sm:border-t-0 sm:border-l border-gray-800/50 pt-4 sm:pt-0 sm:pl-8">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-green-400/5 rounded-lg">
                 <Sparkles className="w-5 h-5 text-green-400" />
@@ -94,9 +94,9 @@ function TokenRewardsPanel() {
         </div>
 
         {/* Reward Info */}
-        <div className="flex items-center gap-2 bg-green-400/5 px-4 py-2 rounded-lg">
+        <div className="flex items-center gap-2 bg-green-400/5 px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm">
           <Zap className="w-4 h-4 text-green-400" />
-          <span className="text-sm text-green-400">
+          <span className="text-green-400">
             Earn 100 {tokenInfo.symbol} per efficient transaction
           </span>
         </div>
@@ -202,12 +202,11 @@ export default function EnergyDashboard() {
             <div className="text-sm text-gray-400 mt-1">Local Time</div>
           </div>
         </div>
+        {/* token Section */}
 
-        {/* Add TokenRewardsPanel before the grid */}
-        <div className="bg-gray-900/50 rounded-lg p-4 sm:p-6 mb-4 sm:mb-6">
+        {/* <div className="bg-gray-900/50 rounded-lg p-4 sm:p-6 mb-4 sm:mb-6">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-8">
             <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-8">
-              {/* Title Section */}
               <div className="flex items-center gap-4">
                 <Coins className="w-6 h-6 sm:w-8 sm:h-8 text-green-400" />
                 <div>
@@ -220,7 +219,6 @@ export default function EnergyDashboard() {
                 </div>
               </div>
 
-              {/* Total Supply */}
               <div className="flex items-center gap-4 sm:gap-6 border-t sm:border-t-0 sm:border-l border-gray-800/50 pt-4 sm:pt-0 sm:pl-8">
                 <div className="flex items-center gap-3">
                   <div className="p-2 bg-green-400/5 rounded-lg">
@@ -234,7 +232,6 @@ export default function EnergyDashboard() {
               </div>
             </div>
 
-            {/* Reward Info */}
             <div className="flex items-center gap-2 bg-green-400/5 px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm">
               <Zap className="w-4 h-4 text-green-400" />
               <span className="text-sm text-green-400">
@@ -242,7 +239,7 @@ export default function EnergyDashboard() {
               </span>
             </div>
           </div>
-        </div>
+        </div> */}
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {/* Energy Impact Analysis */}
