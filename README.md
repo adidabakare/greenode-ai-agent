@@ -2,6 +2,10 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
+## Live Demo
+
+Visit our live demo at: [https://greenodeai.netlify.app/](https://greenodeai.netlify.app/)
+
 ## Description
 
 Base GreenNode Energy Optimization is a blockchain energy monitoring and optimization platform built on Base Sepolia. It provides real-time analysis of smart contract energy consumption using AI-powered insights to suggest gas optimizations and reduce environmental impact.
