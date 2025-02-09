@@ -26,16 +26,16 @@ export function TransactionsTabBase() {
     useTransactionMonitor();
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  //   useEffect(() => {
-  //     const interval = setInterval(() => {
-  //       setIsRefreshing(true);
-  //       refreshTransactions().finally(() => {
-  //         setTimeout(() => setIsRefreshing(false), 1000);
-  //       });
-  //     }, 5000);
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setIsRefreshing(true);
+      refreshTransactions().finally(() => {
+        setTimeout(() => setIsRefreshing(false), 1000);
+      });
+    }, 5000);
 
-  //     return () => clearInterval(interval);
-  //   }, [refreshTransactions]);
+    return () => clearInterval(interval);
+  }, [refreshTransactions]);
 
   const getExplorerUrl = (hash: string) =>
     `https://sepolia.basescan.org/tx/${hash}`;
