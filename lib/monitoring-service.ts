@@ -14,18 +14,23 @@ export class MonitoringService {
   private basescanApi: string;
   public monitorContract: ethers.Contract;
   private processedTxHashes = new Set<string>();
-  private aiEndpoint = "https://autonome.alt.technology/greenode-hrjiay/chat";
-  private aiCredentials = btoa("greenode:dcMWueeaVK"); // Base64 encode credentials
+  private aiEndpoint: string;
+  private aiCredentials: string;
   private agentService: AgentService;
 
   constructor() {
     this.provider = new ethers.JsonRpcProvider("https://sepolia.base.org");
-    // Use Base's public WebSocket endpoint
     this.wsProvider = new ethers.WebSocketProvider(
       "wss://base-sepolia.g.alchemy.com/v2/demo"
     );
     this.basescanApiKey = process.env.NEXT_PUBLIC_BASESCAN_API_KEY || "";
     this.basescanApi = "https://api-sepolia.basescan.org/api";
+
+    // Initialize AI configuration from environment variables
+    this.aiEndpoint = process.env.NEXT_PUBLIC_AI_ENDPOINT || "";
+    const aiUsername = process.env.NEXT_PUBLIC_AI_USERNAME || "";
+    const aiPassword = process.env.NEXT_PUBLIC_AI_PASSWORD || "";
+    this.aiCredentials = btoa(`${aiUsername}:${aiPassword}`);
 
     // Initialize contract
     this.monitorContract = new ethers.Contract(
