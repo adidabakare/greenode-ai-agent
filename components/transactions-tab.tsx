@@ -16,7 +16,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { formatEther } from "ethers";
 import { MonitoringService } from "@/lib/monitoring-service";
 import { AIInsightCard } from "./ai-insight-card";
