@@ -1,36 +1,163 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# DeFAI Energy Optimization Dashboard
 
-## Getting Started
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-First, run the development server:
+## Description
+
+Base GreenNode Energy Optimization is a blockchain energy monitoring and optimization platform built on Base Sepolia. It provides real-time analysis of smart contract energy consumption using AI-powered insights to suggest gas optimizations and reduce environmental impact.
+
+## Table of Contents
+
+- [Installation](#installation)
+- [Usage](#usage)
+- [Features](#features)
+- [Configuration](#configuration)
+- [API Reference](#api-reference)
+- [Testing](#testing)
+- [Deployment](#deployment)
+- [Contributing](#contributing)
+- [License](#license)
+- [Contact](#contact)
+
+## Installation
+
+1. Clone the repository
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/adidabakare/greenode-ai-agent
+cd greenode-ai-agent
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Install dependencies
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+yarn install
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+3. Copy environment variables
 
-## Learn More
+```bash
+cp .env.example .env
+```
 
-To learn more about Next.js, take a look at the following resources:
+4. Set up database
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+yarn db:push
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Usage
 
-## Deploy on Vercel
+Start the development server:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+yarn dev
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Access the dashboard at `http://localhost:3000`
+
+## Features
+
+- Real-time transaction monitoring
+- AI-powered gas optimization suggestions
+- Energy impact analysis and visualization
+- Smart contract efficiency tracking
+- Automated optimization alerts
+- Carbon footprint reporting
+
+## Configuration
+
+Required environment variables:
+
+```env
+# Database Configuration
+DATABASE_URL=your_neon_db_url
+
+# Blockchain Configuration
+BASE_SEPOLIA_RPC=your_rpc_url
+PRIVATE_KEY=your_wallet_private_key
+
+# AI Configuration
+NEXT_PUBLIC_AI_ENDPOINT= your_ai_endpoint
+NEXT_PUBLIC_AI_USERNAME= your_username
+NEXT_PUBLIC_AI_PASSWORD= your_password
+```
+
+## API Reference
+
+### Monitor Transaction
+
+```typescript
+POST /api/agent
+Content-Type: application/json
+
+{
+    "type": "transaction",
+    "data": {
+        "hash": string,
+        "gasUsed": bigint,
+        "input": string
+    }
+}
+```
+
+### Get Network Analysis
+
+```typescript
+POST /api/agent
+Content-Type: application/json
+
+{
+    "type": "network",
+    "data": {
+        "totalGasUsed": bigint,
+        "averageGasPrice": bigint,
+        "transactionCount": number
+    }
+}
+```
+
+## Testing
+
+Run the test suite:
+
+```bash
+# Run unit tests
+yarn test
+
+# Run contract tests
+npx hardhat test
+```
+
+## Deployment
+
+1. Deploy smart contracts:
+
+```bash
+npx hardhat run scripts/deploy.ts --network baseSepolia
+```
+
+2. Build and deploy frontend:
+
+```bash
+yarn build
+yarn start
+```
+
+## Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+## License
+
+Distributed under the MIT License. See `LICENSE` for more information.
+
+## Contact
+
+Name - [@Pakari Isbum](https://github.com/pakariisbum0)
+
+Project Link: [pakariisbum](https://github.com/pakariisbum0)
